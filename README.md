@@ -1,4 +1,4 @@
-6.3) Recomendação de filmes (Regras de Produção)
+Recomendação de filmes (Regras de Produção)
 
 Elabore um sistema capaz de realizar recomendações de filmes. O sistema deve realizar perguntas
 diversas para conhecer o gosto do usuário, seus objetivos e as características do filme que deseja assistir,
