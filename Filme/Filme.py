@@ -14,16 +14,22 @@ def recomendar_filmes(genero):
         
         filmes = []
         
-        # Extrai os filmes da página
-        for item in soup.find_all('div', class_='card card-entity card-entity-list cf'):
-            titulo = item.find('h2', class_='meta-title').text.strip()
-            sinopse = item.find('div', class_='content-txt').text.strip()
+        # Tenta encontrar os filmes com uma estrutura alternativa
+        for item in soup.find_all('div', class_='entity-card-list-item'):
+            # Procura o título e sinopse
+            titulo_element = item.find('a', class_='meta-title-link')
+            sinopse_element = item.find('div', class_='synopsis')
             
-            filmes.append({
-                'titulo': titulo,
-                'sinopse': sinopse,
-                'comentarios': 'Comentários sobre o filme não foram capturados.'  # Ponto de melhoria
-            })
+            # Verifica se ambos os elementos foram encontrados
+            if titulo_element and sinopse_element:
+                titulo = titulo_element.text.strip()
+                sinopse = sinopse_element.text.strip()
+                
+                filmes.append({
+                    'titulo': titulo,
+                    'sinopse': sinopse,
+                    'comentarios': 'Comentários sobre o filme não foram capturados.'
+                })
         
         # Retorna até 5 filmes como recomendação
         return filmes[:5]
