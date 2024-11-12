@@ -47,31 +47,28 @@ def criar_crawler_adorocinema(genero, duracao, decada):
     lista_filmes = []
 
     for filme in filmes:
-        # Extrai o link e o nome do filme
+        # Extrai o nome do filme
         link_tag = filme.find('a', class_='meta-title-link')
         nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
-        link = "https://www.adorocinema.com" + link_tag['href'] if link_tag else ""
 
         # Extrai a duração do filme
         duracao_tag = filme.find('div', class_='meta-body-item meta-body-info')
-        duracao_texto = duracao_tag.text.strip() if duracao_tag else ""
-        horas, minutos = 0, 0
+        duracao_texto = duracao_tag.get_text(strip=True) if duracao_tag else ""
+        
+        # Extrai horas e minutos
+        duracao_minutos = 0
         if "h" in duracao_texto:
-            partes = duracao_texto.split("h")
-            horas = int(partes[0].strip()) if partes[0].strip().isdigit() else 0
-            duracao_texto = partes[1] if len(partes) > 1 else ""
-        if "min" in duracao_texto:
-            minutos_text = duracao_texto.replace("min", "").strip()
-            minutos = int(minutos_text) if minutos_text.isdigit() else 0
-        duracao_minutos = horas * 60 + minutos
+            horas_part = duracao_texto.split("h")[0].strip()
+            duracao_minutos += int(horas_part) * 60 if horas_part.isdigit() else 0
 
-        # Extrai o ano de lançamento
-        ano_tag = filme.find('span', class_='date')
-        ano_lancamento = int(ano_tag.text.strip()[-4:]) if ano_tag and ano_tag.text.strip()[-4:].isdigit() else "Ano não encontrado"
+        if "min" in duracao_texto:
+            minutos_part = duracao_texto.split("min")[0].strip().split()[-1]
+            duracao_minutos += int(minutos_part) if minutos_part.isdigit() else 0
 
         # Extrai os gêneros do filme
-        genero_links = filme.find_all('a', class_='xXx dark-grey-link')
-        generos = [g.text.strip() for g in genero_links if '/genero-' in g['href']] if genero_links else ["Gênero não encontrado"]
+        genero_container = filme.find('div', class_='meta-body-item meta-body-info')
+        genero_links = genero_container.find_all('a', class_='xxx dark-grey-link') if genero_container else []
+        generos = [g.text.strip() for g in genero_links]
 
         # Filtros por duração
         if duracao.lower() != "indiferente":
@@ -83,8 +80,6 @@ def criar_crawler_adorocinema(genero, duracao, decada):
         # Adiciona o filme à lista de recomendações
         lista_filmes.append({
             'nome': nome,
-            'link': link,
-            'ano': ano_lancamento,
             'duracao': duracao_minutos,
             'generos': generos
         })
@@ -100,10 +95,8 @@ def exibir_recomendacoes(filmes):
     
     for i, filme in enumerate(filmes, 1):
         print(f"Filme {i}: {filme['nome']}")
-        print(f"Link: {filme['link']}")
-        print(f"Ano: {filme['ano']}")
         print(f"Duração: {filme['duracao']} minutos")
-        print(f"Gêneros: {', '.join(filme['generos'])}")
+        print(f"Gêneros: {', '.join(filme['generos']) if filme['generos'] else 'Gênero não encontrado'}")
         print("\n")
 
 def sistema_recomendacao():
