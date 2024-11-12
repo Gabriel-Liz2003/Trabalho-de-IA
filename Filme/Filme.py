@@ -39,63 +39,90 @@ def criar_crawler_adorocinema(genero, duracao, decada):
         print("Gênero não encontrado. Tente novamente com um gênero válido.")
         return []
 
-    # Monta a URL com gênero e década
-    url = f"https://www.adorocinema.com/filmes/melhores/genero-{genero_codigo}/"
+    # Monta a URL base com o gênero e a década
+    url_base = f"https://www.adorocinema.com/filmes/melhores/genero-{genero_codigo}/"
     if decada:
-        url += f"decada-{decada}/"
+        url_base += f"decada-{decada}/"
 
-    response = requests.get(url)
-    if response.status_code != 200:
-        print("Erro ao acessar o site.")
-        return []
-    
-    soup = BeautifulSoup(response.text, 'html.parser')
-    filmes = soup.find_all('div', class_='card entity-card entity-card-list cf')
     lista_filmes = []
+    pagina = 1
 
-    for filme in filmes:
-        # Extrai o nome do filme
-        link_tag = filme.find('a', class_='meta-title-link')
-        nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
-
-        # Extrai a duração do filme
-        duracao_tag = filme.find('div', class_='meta-body-item meta-body-info')
-        duracao_texto = duracao_tag.get_text(strip=True) if duracao_tag else ""
+    while len(lista_filmes) < 10:  # Continua até ter 10 filmes
+        # Monta a URL da página atual
+        url = f"{url_base}?page={pagina}"
         
-        # Extrai horas e minutos
-        duracao_minutos = 0
-        if "h" in duracao_texto:
-            horas_part = duracao_texto.split("h")[0].strip()
-            duracao_minutos += int(horas_part) * 60 if horas_part.isdigit() else 0
+        # Faz a requisição à página
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(f"Erro ao acessar a página {pagina}.")
+            break
+        
+        # Parse do conteúdo HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+        filmes = soup.find_all('div', class_='card entity-card entity-card-list cf')
 
-        if "min" in duracao_texto:
-            minutos_part = duracao_texto.split("min")[0].strip().split()[-1]
-            duracao_minutos += int(minutos_part) if minutos_part.isdigit() else 0
+        if not filmes:
+            print(f"Não foram encontrados filmes na página {pagina}.")
+            break  # Se não houver filmes na página, sai do loop
+        
+        # Para cada filme na página, extraímos as informações
+        for filme in filmes:
+            # Extrai o nome do filme
+            link_tag = filme.find('a', class_='meta-title-link')
+            nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
 
-        # Extrai os gêneros do filme
-        genero_container = filme.find('div', class_='meta-body-item meta-body-info')
-        genero_links = genero_container.find_all('a', class_='xxx dark-grey-link') if genero_container else []
-        generos = [g.text.strip() for g in genero_links]
+            # Extrai a sinopse
+            sinopse_tag = filme.find('div', class_='content-txt')
+            sinopse = sinopse_tag.text.strip() if sinopse_tag else "Sinopse não encontrada"
 
-        # Filtros por duração
-        if duracao.lower() != "indiferente":
-            if duracao.lower() == "curto" and duracao_minutos > 130:
-                continue
-            elif duracao.lower() == "longos" and duracao_minutos <= 130:
-                continue
+            # Extrai a duração do filme
+            duracao_tag = filme.find('div', class_='meta-body-item meta-body-info')
+            duracao_texto = duracao_tag.get_text(strip=True) if duracao_tag else ""
 
-        # Adiciona o filme à lista de recomendações
-        lista_filmes.append({
-            'nome': nome,
-            'duracao': duracao_minutos,
-            'generos': generos
-        })
+            # Processa a duração e o gênero
+            duracao_minutos = 0
+            if "h" in duracao_texto:
+                horas_part = duracao_texto.split("h")[0].strip()
+                duracao_minutos += int(horas_part) * 60 if horas_part.isdigit() else 0
 
-        # Limita a 5 filmes recomendados
-        if len(lista_filmes) == 5:
+            if "min" in duracao_texto:
+                minutos_part = duracao_texto.split("min")[0].strip().split()[-1]
+                duracao_minutos += int(minutos_part) if minutos_part.isdigit() else 0
+
+            # Extrai o gênero
+            genero_part = "Gênero não encontrado"
+            partes = duracao_texto.split("|")
+            if len(partes) > 1:
+                genero_part = partes[1].strip()
+
+            # Filtros por duração
+            if duracao.lower() != "indiferente":
+                if duracao.lower() == "curto" and duracao_minutos > 130:
+                    continue
+                elif duracao.lower() == "longos" and duracao_minutos <= 130:
+                    continue
+
+            # Adiciona o filme à lista
+            lista_filmes.append({
+                'nome': nome,
+                'duracao': duracao_minutos,
+                'generos': genero_part,
+                'sinopse': sinopse
+            })
+
+            # Se já tiver 10 filmes, interrompe a busca
+            if len(lista_filmes) == 10:
+                break
+        
+        # Se já encontrou 10 filmes, sai do loop
+        if len(lista_filmes) >= 10:
             break
 
-    return lista_filmes
+        # Incrementa a página
+        pagina += 1
+
+    # Limita a lista a 10 filmes
+    return lista_filmes[:10]
 
 def exibir_recomendacoes(filmes):
     print("\nAqui estão suas recomendações de filmes:\n")
@@ -103,7 +130,8 @@ def exibir_recomendacoes(filmes):
     for i, filme in enumerate(filmes, 1):
         print(f"Filme {i}: {filme['nome']}")
         print(f"Duração: {filme['duracao']} minutos")
-        print(f"Gêneros: {', '.join(filme['generos']) if filme['generos'] else 'Gênero não encontrado'}")
+        print(f"Gêneros: {filme['generos']}")
+        print(f"Sinopse: {filme['sinopse']}")
         print("\n")
 
 def sistema_recomendacao():
