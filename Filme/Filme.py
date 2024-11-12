@@ -1,24 +1,30 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import unicodedata
 
 GENERO_MAPA = {
-    "Animação": "13026",
-    "Aventura": "13001",
-    "Ação": "13025",
-    "Biopic": "13027",
-    "Comédia": "13005",
-    "Comédia dramática": "13002",
-    "Drama": "13008",
-    "Família": "13036",
-    "Fantasia": "13012",
-    "Ficção Científica": "13021",
-    "Histórico": "13015",
-    "Policial": "13018",
-    "Romance": "13024",
-    "Suspense": "13023",
-    "Terror": "13009"
+    "animacao": "13026",
+    "aventura": "13001",
+    "acao": "13025",
+    "biopic": "13027",
+    "comedia": "13005",
+    "comedia dramatica": "13002",
+    "drama": "13008",
+    "familia": "13036",
+    "fantasia": "13012",
+    "ficcao cientifica": "13021",
+    "historico": "13015",
+    "policial": "13018",
+    "romance": "13024",
+    "suspense": "13023",
+    "terror": "13009"
 }
+def remover_acentos(texto):
+    # Normaliza o texto para a forma decomposed (com os acentos separados)
+    texto_normalizado = unicodedata.normalize('NFD', texto)
+    # Filtra e mantém apenas caracteres ASCII (removendo acentos e caracteres especiais)
+    return ''.join([c for c in texto_normalizado if unicodedata.category(c) != 'Mn'])
 
 def perguntar_preferencias():
     print("Bem-vindo ao sistema de recomendação de filmes!")
@@ -28,7 +34,7 @@ def perguntar_preferencias():
     return genero, duracao, decada
 
 def criar_crawler_adorocinema(genero, duracao, decada):
-    genero_codigo = GENERO_MAPA.get(genero, None)
+    genero_codigo = GENERO_MAPA.get(remover_acentos(genero.lower()), None)
     if not genero_codigo:
         print("Gênero não encontrado. Tente novamente com um gênero válido.")
         return []
