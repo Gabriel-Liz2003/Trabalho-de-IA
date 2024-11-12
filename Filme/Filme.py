@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 GENERO_MAPA = {
     "Animação": "13026",
@@ -62,6 +63,7 @@ def criar_crawler_adorocinema(genero, duracao, decada):
             duracao_texto = partes[1] if len(partes) > 1 else ""
         if "min" in duracao_texto:
             minutos_text = duracao_texto.replace("min", "").strip()
+            minutos = re.search(r'\d{2}', duracao_texto)
             minutos = int(minutos_text) if minutos_text.isdigit() else 0
         duracao_minutos = horas * 60 + minutos
 
