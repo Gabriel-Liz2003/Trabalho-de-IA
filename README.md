@@ -15,8 +15,6 @@ O sistema deve apresentar:
 
 As informações sobre os filmes devem ser retiradas de sites como www.adorocinema.com.br
 por meio de um crawler.
-Ponto extra: As perguntas devem ser realizadas por um chatbot. Pode-se usar bibliotecas ou APIs prontas
-que facilitem o processo de conversa com o usuário, mas não se deve utilizar nenhuma ferramenta que
-indicará os filmes automaticamente, esta tarefa deve ser feita pelo sistema desenvolvido no trabalho. 
+
 
 # Video Explicativo:
