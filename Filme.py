@@ -41,7 +41,6 @@ def criar_crawler_adorocinema(genero, duracao, decada):
         print("Gênero não encontrado. Tente novamente com um gênero válido.")
         return []
 
-    # Monta a URL base com o gênero e a década
     url_base = f"https://www.adorocinema.com/filmes/melhores/genero-{genero_codigo}/"
     if decada:
         url_base += f"decada-{decada}/"
@@ -51,45 +50,43 @@ def criar_crawler_adorocinema(genero, duracao, decada):
 
     while len(lista_filmes) < 10:  # Continua até ter 10 filmes
         url = f"{url_base}?page={pagina}"
-        
-        # Faz a requisição à página
         response = requests.get(url)
         if response.status_code != 200:
             print(f"Erro ao acessar a página {pagina}.")
             break
         
-        # Parse do conteúdo HTML
         soup = BeautifulSoup(response.text, 'html.parser')
         filmes = soup.find_all('div', class_='card entity-card entity-card-list cf')
 
         if not filmes:
             print(f"Não foram encontrados filmes na página {pagina}.")
-            break  # Se não houver filmes na página, sai do loop
+            break
         
-        # Para cada filme na página, extraímos as informações
         for filme in filmes:
-            # Extrai o nome do filme
             link_tag = filme.find('a', class_='meta-title-link')
             nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
-            
-            # Extrai o código do filme
             link_filme = link_tag['href'] if link_tag else None
             codigo_filme = link_filme.split("-")[-1].strip("/") if link_filme else None
 
-            # Extrai a sinopse
-            sinopse_tag = filme.find('div', class_='content-txt')
-            sinopse = sinopse_tag.text.strip() if sinopse_tag else "Sinopse não encontrada"
+            # Extrai a imagem do filme
+            img_tag = filme.find('img', class_='thumbnail-img')
+            imagem_url = img_tag['data-src'] if img_tag and 'data-src' in img_tag.attrs else (
+                img_tag['src'] if img_tag and 'src' in img_tag.attrs else "Imagem não encontrada"
+            )
 
-            # Extrai a duração do filme
+            sinopse_tag = filme.find('div', class_='content-txt')
+            if sinopse_tag:
+                texto_completo = sinopse_tag.find('span', class_='hidden-text')
+                sinopse = texto_completo.get_text(strip=True) if texto_completo else sinopse_tag.get_text(strip=True)
+            else:
+                sinopse = "Sinopse não encontrada"
+
             duracao_tag = filme.find('div', class_='meta-body-item meta-body-info')
             duracao_texto = duracao_tag.get_text(strip=True) if duracao_tag else ""
-
-            # Processa a duração e o gênero
             duracao_minutos = 0
             if "h" in duracao_texto:
                 horas_part = duracao_texto.split("h")[0].strip()
                 duracao_minutos += int(horas_part) * 60 if horas_part.isdigit() else 0
-
             if "min" in duracao_texto:
                 minutos_part = duracao_texto.split("min")[0].strip().split()[-1]
                 duracao_minutos += int(minutos_part) if minutos_part.isdigit() else 0
@@ -99,23 +96,19 @@ def criar_crawler_adorocinema(genero, duracao, decada):
             if len(partes) > 1:
                 genero_part = partes[1].strip()
 
-            # Filtros por duração
             if duracao.lower() != "indiferente":
                 if duracao.lower() == "curto" and duracao_minutos > 130:
                     continue
                 elif duracao.lower() == "longos" and duracao_minutos <= 130:
                     continue
 
-            # Pega o ano de lançamento da página específica do filme
             url_filme = f"https://www.adorocinema.com/filmes/filme-{codigo_filme}/"
             ano_lancamento = extrair_ano_lancamento(url_filme)
-
-            # Pega os comentários do filme
             comentarios = extrair_comentarios(url_filme)
 
-            # Adiciona o filme à lista
             lista_filmes.append({
                 'nome': nome,
+                'imagem': imagem_url,  # Adiciona o link da imagem
                 'duracao': duracao_minutos,
                 'generos': genero_part,
                 'sinopse': sinopse,
@@ -123,14 +116,13 @@ def criar_crawler_adorocinema(genero, duracao, decada):
                 'comentarios': comentarios
             })
 
-            # Se já tiver 10 filmes, interrompe a busca
             if len(lista_filmes) == 10:
                 break
 
-        # Incrementa a página
         pagina += 1
 
     return lista_filmes[:10]
+
 
 def extrair_ano_lancamento(url_filme):
     """Extrai o ano de lançamento de uma página específica de filme."""
@@ -176,6 +168,7 @@ def exibir_recomendacoes(filmes):
     
     for i, filme in enumerate(filmes, 1):
         print(f"Filme {i}: {filme['nome']}")
+        print(f"Imagem: {filme['imagem']}")
         print(f"Duração: {filme['duracao']} minutos")
         print(f"Gêneros: {filme['generos']}")
         print(f"Sinopse: {filme['sinopse']}")
@@ -184,6 +177,7 @@ def exibir_recomendacoes(filmes):
         for comentario in filme['comentarios']:
             print(f"- {comentario}")
         print("-" * 30)
+
 
 def sistema_recomendacao():
     """Sistema principal de recomendação."""
