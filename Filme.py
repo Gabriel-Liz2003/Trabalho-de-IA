@@ -47,8 +47,9 @@ def criar_crawler_adorocinema(genero, duracao, decada):
 
     lista_filmes = []
     pagina = 1
+    max_paginas = 6  # Define o limite máximo de páginas
 
-    while len(lista_filmes) < 10:  # Continua até ter 10 filmes
+    while len(lista_filmes) < 10 and pagina <= max_paginas:  # Continua até 10 filmes ou 6 páginas
         url = f"{url_base}?page={pagina}"
         response = requests.get(url)
         if response.status_code != 200:
@@ -59,7 +60,7 @@ def criar_crawler_adorocinema(genero, duracao, decada):
         filmes = soup.find_all('div', class_='card entity-card entity-card-list cf')
 
         if not filmes:
-            print(f"Não foram encontrados filmes na página {pagina}.")
+            print(f"Fim das páginas alcançado ou nenhuma informação na página {pagina}.")
             break
         
         for filme in filmes:
@@ -122,8 +123,9 @@ def criar_crawler_adorocinema(genero, duracao, decada):
 
         pagina += 1
 
-    return lista_filmes[:10]
-
+    if len(lista_filmes) < 10:
+        print(f"Apenas {len(lista_filmes)} filmes foram encontrados no total.")
+    return lista_filmes
 
 def extrair_ano_lancamento(url_filme):
     """Extrai o ano de lançamento de uma página específica de filme."""
