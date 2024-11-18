@@ -20,13 +20,14 @@ GENERO_MAPA = {
     "suspense": "13023",
     "terror": "13009"
 }
+
 def remover_acentos(texto):
-    # Normaliza o texto para a forma decomposed (com os acentos separados)
+    """Remove acentos do texto."""
     texto_normalizado = unicodedata.normalize('NFD', texto)
-    # Filtra e mantém apenas caracteres ASCII (removendo acentos e caracteres especiais)
     return ''.join([c for c in texto_normalizado if unicodedata.category(c) != 'Mn'])
 
 def perguntar_preferencias():
+    """Pergunta as preferências do usuário."""
     print("Bem-vindo ao sistema de recomendação de filmes!")
     genero = input("Qual gênero de filme você prefere? (Ex: Ação, Comédia, Drama, Terror, etc.): ").strip()
     duracao = input("Você prefere filmes mais longos ou curtos? (Responda: Longos/Curto/Indiferente): ").strip()
@@ -34,6 +35,7 @@ def perguntar_preferencias():
     return genero, duracao, decada
 
 def criar_crawler_adorocinema(genero, duracao, decada):
+    """Cria o crawler que busca os filmes baseados nas preferências do usuário."""
     genero_codigo = GENERO_MAPA.get(remover_acentos(genero.lower()), None)
     if not genero_codigo:
         print("Gênero não encontrado. Tente novamente com um gênero válido.")
@@ -48,7 +50,6 @@ def criar_crawler_adorocinema(genero, duracao, decada):
     pagina = 1
 
     while len(lista_filmes) < 10:  # Continua até ter 10 filmes
-        # Monta a URL da página atual
         url = f"{url_base}?page={pagina}"
         
         # Faz a requisição à página
@@ -71,8 +72,9 @@ def criar_crawler_adorocinema(genero, duracao, decada):
             link_tag = filme.find('a', class_='meta-title-link')
             nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
             
-            # Extrai o link do filme
-            link_filme = "https://www.adorocinema.com" + link_tag['href'] if link_tag else None
+            # Extrai o código do filme
+            link_filme = link_tag['href'] if link_tag else None
+            codigo_filme = link_filme.split("-")[-1].strip("/") if link_filme else None
 
             # Extrai a sinopse
             sinopse_tag = filme.find('div', class_='content-txt')
@@ -92,7 +94,6 @@ def criar_crawler_adorocinema(genero, duracao, decada):
                 minutos_part = duracao_texto.split("min")[0].strip().split()[-1]
                 duracao_minutos += int(minutos_part) if minutos_part.isdigit() else 0
 
-            # Extrai o gênero
             genero_part = "Gênero não encontrado"
             partes = duracao_texto.split("|")
             if len(partes) > 1:
@@ -105,58 +106,72 @@ def criar_crawler_adorocinema(genero, duracao, decada):
                 elif duracao.lower() == "longos" and duracao_minutos <= 130:
                     continue
 
-            # Extrai os comentários do filme
-            comentarios = extrair_comentarios(link_filme) if link_filme else ["Comentários não encontrados."]
-            
+            # Pega o ano de lançamento da página específica do filme
+            url_filme = f"https://www.adorocinema.com/filmes/filme-{codigo_filme}/"
+            ano_lancamento = extrair_ano_lancamento(url_filme)
+
+            # Pega os comentários do filme
+            comentarios = extrair_comentarios(url_filme)
+
             # Adiciona o filme à lista
             lista_filmes.append({
                 'nome': nome,
                 'duracao': duracao_minutos,
                 'generos': genero_part,
                 'sinopse': sinopse,
+                'ano': ano_lancamento,
                 'comentarios': comentarios
             })
 
             # Se já tiver 10 filmes, interrompe a busca
             if len(lista_filmes) == 10:
                 break
-        
-        # Se já encontrou 10 filmes, sai do loop
-        if len(lista_filmes) >= 10:
-            break
 
         # Incrementa a página
         pagina += 1
 
-    # Limita a lista a 10 filmes
     return lista_filmes[:10]
 
-def extrair_comentarios(url_filme):
-    response = requests.get(url_filme)
-    if response.status_code != 200:
-        print(f"Erro ao acessar a página do filme: {url_filme}")
-        return ["Não foi possível acessar a página para comentários."]
-    
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Seleciona os elementos de comentários
-    comentarios_html = soup.find_all('div', class_='review-card-content')  # Ajuste conforme necessário
-
-    comentarios = []
-    for comentario_tag in comentarios_html[:5]:  # Limita a 5 comentários
-        # Tenta capturar o texto completo se estiver escondido
-        texto_completo = comentario_tag.find('span', class_='hidden-text')  # Exemplo de classe
-        if texto_completo:
-            comentario = texto_completo.get_text(strip=True)
-        else:
-            # Caso não haja texto escondido, captura o texto visível
-            comentario = comentario_tag.get_text(strip=True)
+def extrair_ano_lancamento(url_filme):
+    """Extrai o ano de lançamento de uma página específica de filme."""
+    try:
+        response = requests.get(url_filme)
+        if response.status_code != 200:
+            print(f"Erro ao acessar a página do filme: {url_filme}")
+            return "Ano não encontrado"
         
-        comentarios.append(comentario)
-    
-    return comentarios
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Procura no título da página
+        title_tag = soup.find("title")
+        if title_tag:
+            match = re.search(r"\b(\d{4})\b", title_tag.text)
+            if match:
+                return int(match.group(1))
+    except Exception as e:
+        print(f"Erro ao extrair o ano do filme: {e}")
+    return "Ano não encontrado"
+
+def extrair_comentarios(url_filme):
+    """Extrai os comentários da página de um filme."""
+    try:
+        response = requests.get(url_filme)
+        if response.status_code != 200:
+            print(f"Erro ao acessar a página do filme: {url_filme}")
+            return ["Não foi possível acessar os comentários."]
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        comentarios_html = soup.find_all('div', class_='review-card-content')  # Ajuste conforme o HTML
+        comentarios = []
+        for comentario_tag in comentarios_html[:5]:  # Limita a 5 comentários
+            texto_completo = comentario_tag.get_text(strip=True)
+            comentarios.append(texto_completo)
+        return comentarios
+    except Exception as e:
+        print(f"Erro ao extrair comentários: {e}")
+    return ["Erro ao extrair comentários."]
 
 def exibir_recomendacoes(filmes):
+    """Exibe as recomendações de filmes."""
     print("\nAqui estão suas recomendações de filmes:\n")
     
     for i, filme in enumerate(filmes, 1):
@@ -164,13 +179,14 @@ def exibir_recomendacoes(filmes):
         print(f"Duração: {filme['duracao']} minutos")
         print(f"Gêneros: {filme['generos']}")
         print(f"Sinopse: {filme['sinopse']}")
+        print(f"Ano de Lançamento: {filme['ano']}")
         print("Comentários:")
         for comentario in filme['comentarios']:
             print(f"- {comentario}")
-        print("\n")
-
+        print("-" * 30)
 
 def sistema_recomendacao():
+    """Sistema principal de recomendação."""
     genero, duracao, decada = perguntar_preferencias()
     filmes = criar_crawler_adorocinema(genero, duracao, decada)
     
