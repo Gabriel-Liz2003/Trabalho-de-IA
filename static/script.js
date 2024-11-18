@@ -43,28 +43,40 @@ function displayRecommendations(filmes) {
     }
 
     // Exibe os filmes recomendados
-    filmes.forEach((filme, index) => {
-        let comentariosHTML = '';
-        if (filme.comentarios && filme.comentarios.length > 0) {
-            comentariosHTML = `<p><strong>Comentários:</strong><ul>`;
-            filme.comentarios.forEach(comentario => {
-                comentariosHTML += `<li style="margin-bottom: 8px;">${comentario}</li>`; // Adiciona uma margem entre os comentários
-            });
-            comentariosHTML += '</ul></p>';
-        } else {
-            comentariosHTML = '<p><strong>Comentários:</strong> Nenhum comentário encontrado.</p>';
-        }
+filmes.forEach((filme, index) => {
+    // Inicializa a variável para os comentários
+    let comentariosHTML = '';
 
-        recommendationsDiv.innerHTML += `
-            <div class="filme">
-                <h3>Filme ${index + 1}: ${filme.nome}</h3>
-                <p><strong>Ano:</strong> ${filme.ano || 'não informado'}</p>
-                <p><strong>Duração:</strong> ${filme.duracao} minutos</p>
-                <p><strong>Gêneros:</strong> ${Array.isArray(filme.generos) ? filme.generos.join(', ') : filme.generos}</p>
-                <p><strong>Sinopse:</strong> ${filme.sinopse}</p>
-                ${comentariosHTML}
-                <a href="${filme.link}" target="_blank" class="ver-mais-btn">Ver mais</a>
-            </div>
-        `;
-    });
+    // Verifica se o filme tem comentários e os exibe
+    if (filme.comentarios && filme.comentarios.length > 0) {
+        comentariosHTML = `<p><strong>Comentários:</strong><ul>`;
+        filme.comentarios.forEach(comentario => {
+            comentariosHTML += `<li style="margin-bottom: 8px;">${comentario}</li>`;
+        });
+        comentariosHTML += '</ul></p>';
+    } else {
+        comentariosHTML = '<p><strong>Comentários:</strong> Nenhum comentário encontrado.</p>';
+    }
+
+    // Cria o HTML para exibir o filme
+    recommendationsDiv.innerHTML += `
+        <div class="filme">
+            <h3>Filme ${index + 1}: ${filme.nome}</h3>
+            <!-- Imagem do filme -->
+            <img src="${filme.imagem}" alt="${filme.nome}" class="filme-imagem" />
+
+            <!-- Detalhes do filme -->
+            <p><strong>Ano:</strong> ${filme.ano || 'não informado'}</p>
+            <p><strong>Duração:</strong> ${filme.duracao} minutos</p>
+            <p><strong>Gêneros:</strong> ${Array.isArray(filme.generos) ? filme.generos.join(', ') : filme.generos}</p>
+            <p><strong>Sinopse:</strong> ${filme.sinopse}</p>
+
+            <!-- Comentários -->
+            ${comentariosHTML}
+
+            <!-- Link para ver mais -->
+            <a href="${filme.url}" target="_blank" class="ver-mais-btn">Ver mais</a>
+        </div>
+    `;
+});
 }

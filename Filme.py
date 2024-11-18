@@ -108,12 +108,13 @@ def criar_crawler_adorocinema(genero, duracao, decada):
 
             lista_filmes.append({
                 'nome': nome,
-                'imagem': imagem_url,  # Adiciona o link da imagem
+                'imagem': imagem_url,
                 'duracao': duracao_minutos,
                 'generos': genero_part,
                 'sinopse': sinopse,
                 'ano': ano_lancamento,
-                'comentarios': comentarios
+                'comentarios': comentarios,
+                'url': url_filme
             })
 
             if len(lista_filmes) == 10:
@@ -177,6 +178,7 @@ def exibir_recomendacoes(filmes):
         for comentario in filme['comentarios']:
             print(f"- {comentario}")
         print("-" * 30)
+
 
 
 def sistema_recomendacao():

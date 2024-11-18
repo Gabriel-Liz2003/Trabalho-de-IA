@@ -77,7 +77,7 @@ button {
 }
 
 button:hover {
-    background-color: #e6b800;
+    background-color: #e6b800cc;
 }
 
 /* ===================== */
@@ -136,13 +136,33 @@ button:hover {
     background-color: #e6b800;
     color: #1c1c1c;
 }
-.filme ver-mais-btn {
+.filme a.ver-mais-btn {
     display: block;
     margin-top: 10px;
     text-decoration: none;
     color: white;
-    background-color: #ff0000; /* Cor vermelha estática */
+    background-color: #ff0000;
     padding: 10px 15px;
     border-radius: 5px;
     text-align: center;
+}
+
+.filme a.ver-mais-btn:hover {
+    background-color: #e60000ab;
+}
+/* Estilo para os comentários dos filmes */
+.filme ul {
+    list-style-type: disc;
+    margin: 10px 0 0 20px;
+    padding: 0;
+    color: #f5f5f5;
+}
+
+.filme ul li {
+    margin-bottom: 8px;
+}
+
+.filme p {
+    margin: 5px 0;
+    color: #cccccc;
 }
