@@ -70,6 +70,9 @@ def criar_crawler_adorocinema(genero, duracao, decada):
             # Extrai o nome do filme
             link_tag = filme.find('a', class_='meta-title-link')
             nome = link_tag.text.strip() if link_tag else "Nome não encontrado"
+            
+            # Extrai o link do filme
+            link_filme = "https://www.adorocinema.com" + link_tag['href'] if link_tag else None
 
             # Extrai a sinopse
             sinopse_tag = filme.find('div', class_='content-txt')
@@ -102,12 +105,16 @@ def criar_crawler_adorocinema(genero, duracao, decada):
                 elif duracao.lower() == "longos" and duracao_minutos <= 130:
                     continue
 
+            # Extrai os comentários do filme
+            comentarios = extrair_comentarios(link_filme) if link_filme else ["Comentários não encontrados."]
+            
             # Adiciona o filme à lista
             lista_filmes.append({
                 'nome': nome,
                 'duracao': duracao_minutos,
                 'generos': genero_part,
-                'sinopse': sinopse
+                'sinopse': sinopse,
+                'comentarios': comentarios
             })
 
             # Se já tiver 10 filmes, interrompe a busca
@@ -124,6 +131,31 @@ def criar_crawler_adorocinema(genero, duracao, decada):
     # Limita a lista a 10 filmes
     return lista_filmes[:10]
 
+def extrair_comentarios(url_filme):
+    response = requests.get(url_filme)
+    if response.status_code != 200:
+        print(f"Erro ao acessar a página do filme: {url_filme}")
+        return ["Não foi possível acessar a página para comentários."]
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Seleciona os elementos de comentários
+    comentarios_html = soup.find_all('div', class_='review-card-content')  # Ajuste conforme necessário
+
+    comentarios = []
+    for comentario_tag in comentarios_html[:5]:  # Limita a 5 comentários
+        # Tenta capturar o texto completo se estiver escondido
+        texto_completo = comentario_tag.find('span', class_='hidden-text')  # Exemplo de classe
+        if texto_completo:
+            comentario = texto_completo.get_text(strip=True)
+        else:
+            # Caso não haja texto escondido, captura o texto visível
+            comentario = comentario_tag.get_text(strip=True)
+        
+        comentarios.append(comentario)
+    
+    return comentarios
+
 def exibir_recomendacoes(filmes):
     print("\nAqui estão suas recomendações de filmes:\n")
     
@@ -132,7 +164,11 @@ def exibir_recomendacoes(filmes):
         print(f"Duração: {filme['duracao']} minutos")
         print(f"Gêneros: {filme['generos']}")
         print(f"Sinopse: {filme['sinopse']}")
+        print("Comentários:")
+        for comentario in filme['comentarios']:
+            print(f"- {comentario}")
         print("\n")
+
 
 def sistema_recomendacao():
     genero, duracao, decada = perguntar_preferencias()
