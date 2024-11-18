@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Recomendação de Filmes</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Recomendador de Filmes</h1>
+      <form id="preferencesForm">
+        <label for="genero">Gênero:</label>
+        <input
+          type="text"
+          id="genero"
+          placeholder="Ex: Ação, Comédia, Drama"
+          required
+        />
+
+        <label for="duracao">Duração:</label>
+        <select id="duracao" required>
+          <option value="indiferente">Indiferente</option>
+          <option value="curto">Curto</option>
+          <option value="longos">Longos</option>
+        </select>
+
+        <label for="ano">Ano de Lançamento (ou década):</label>
+        <input type="text" id="ano" placeholder="Digite o ano ou deixe vazio" />
+
+        <button type="submit">Buscar Filmes</button>
+      </form>
+
+      <div id="recommendations"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
