@@ -1,22 +1,39 @@
+/* ===================== */
+/* BODY E CONTAINER BASE */
+/* ===================== */
+
 body {
-    font-family: Arial, sans-serif;
-    background-color : #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background-color: #1c1c1c; /* Cor de fundo escura, típica de temas de cinema */
+    color: #f5f5f5; /* Texto claro para contraste */
     margin: 0;
     padding: 20px;
 }
 
 .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: auto;
-    background: white;
+    background: #252525; /* Fundo levemente mais claro */
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Efeito de sombra */
 }
+
+/* ===================== */
+/* TÍTULOS */
+/* ===================== */
 
 h1 {
     text-align: center;
+    color: #ffcc00; /* Amarelo característico do AdoroCinema */
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Sombra para destaque */
 }
+
+/* ===================== */
+/* FORMULÁRIO */
+/* ===================== */
 
 form {
     display: flex;
@@ -25,24 +42,107 @@ form {
 
 label {
     margin: 10px 0 5px;
+    color: #ffcc00;
+    font-weight: bold;
 }
 
-input, select, button {
+input, select {
     padding: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    background-color: #3b3b3b; /* Fundo escuro */
+    border: 1px solid #666666; /* Borda cinza */
+    border-radius: 5px;
+    color: #f5f5f5;
 }
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #ffcc00; /* Destaque amarelo ao focar */
+    box-shadow: 0 0 5px #ffcc00;
+}
+
+/* ===================== */
+/* BOTÕES */
+/* ===================== */
 
 button {
-    background-color: #28a745;
-    color: white;
+    padding: 12px;
+    background-color: #ffcc00;
+    color: #252525;
+    font-weight: bold;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: #e6b800;
 }
 
+/* ===================== */
+/* RECOMENDAÇÕES */
+/* ===================== */
+
 #recommendations {
-    margin-top: 20px;
+    margin-top: 30px;
+}
+
+.filme {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #444444;
+    border-radius: 8px;
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.filme h3 {
+    margin-top: 0;
+    color: #ffcc00;
+    font-size: 1.2em;
+}
+
+.filme p {
+    margin: 5px 0;
+    color: #cccccc; /* Texto secundário em cinza claro */
+}
+
+.filme ul {
+    list-style-type: disc;
+    margin: 10px 0 0 20px;
+    padding: 0;
+    color: #f5f5f5;
+}
+
+.filme ul li {
+    margin-bottom: 8px;
+}
+
+.filme a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #ffcc00;
+    color: #252525;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.filme a:hover {
+    background-color: #e6b800;
+    color: #1c1c1c;
+}
+.filme ver-mais-btn {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: white;
+    background-color: #ff0000; /* Cor vermelha estática */
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
 }
