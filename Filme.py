@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import unicodedata
-
+ 
+ #Lista de generos pra busca
 GENERO_MAPA = {
     "animacao": "13026",
     "aventura": "13001",
@@ -21,6 +22,7 @@ GENERO_MAPA = {
     "terror": "13009"
 }
 
+#Metodo pra remover acentos do texto 
 def remover_acentos(texto):
     """Remove acentos do texto."""
     texto_normalizado = unicodedata.normalize('NFD', texto)
@@ -33,6 +35,7 @@ def perguntar_preferencias():
     duracao = input("Você prefere filmes mais longos ou curtos? (Responda: Longos/Curto/Indiferente): ").strip()
     decada = input("Há alguma preferência por década de lançamento? (Ex: 1980, 1990 ou deixe vazio para indiferente): ").strip()
     return genero, duracao, decada
+
 
 def criar_crawler_adorocinema(genero, duracao, decada):
     """Cria o crawler que busca os filmes baseados nas preferências do usuário."""
