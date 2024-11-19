@@ -18,3 +18,5 @@ por meio de um crawler.
 
 
 # Video Explicativo:
+
+[![Assista ao vídeo](https://img.youtube.com/vi/QLlvchvixgk/0.jpg)](https://www.youtube.com/watch?v=QLlvchvixgk)
