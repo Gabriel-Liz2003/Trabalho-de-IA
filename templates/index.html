@@ -1,41 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <!-- Define o idioma da página como português do Brasil. -->
-
   <head>
     <meta charset="UTF-8" />
-    <!-- Define a codificação de caracteres para evitar problemas com acentos e símbolos. -->
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Configura a página para ser responsiva em diferentes tamanhos de tela. -->
-
     <title>Sistema de Recomendação de Filmes</title>
-    <!-- Define o título exibido na aba do navegador. -->
-
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
     />
-    <!-- Importa o arquivo de estilos CSS. O Flask usa o 'url_for' para gerar o caminho correto. -->
   </head>
-
   <body>
     <div class="container">
-      <!-- Contêiner principal para organizar o layout do conteúdo. -->
-
-      <center>
-        <!-- Centraliza a imagem que serve como destaque do site. -->
-        <img
-          width="50%"
-          src="{{ url_for('static', filename='imagens/imagem_site_1.png') }}"
-          alt="Recomendador de Filme"
-        />
-        <!-- Imagem ilustrativa. O atributo 'alt' garante acessibilidade caso a imagem não carregue. -->
-      </center>
-
-      <form id="preferencesForm">
-        <!-- Formulário para o usuário informar suas preferências de filmes. -->
-
+        <center>
+            <img width="50%" src="{{ url_for('static', filename='imagens/imagem_site_1.png') }}" alt="Recomendador de Filme" />
+        </center>
+        <form id="preferencesForm">
         <label for="genero">Gênero:</label>
         <input
           type="text"
@@ -43,7 +22,6 @@
           placeholder="Ex: Ação, Comédia, Drama"
           required
         />
-        <!-- Campo de texto para o usuário inserir o gênero desejado. -->
 
         <label for="duracao">Duração:</label>
         <select id="duracao" required>
@@ -51,32 +29,27 @@
           <option value="curto">Curto</option>
           <option value="longos">Longos</option>
         </select>
-        <!-- Seleção de duração, com opções como "indiferente", "curto" e "longos". -->
 
         <label for="ano">Década de Lançamento:</label>
         <select id="ano">
-          <option value="">Selecione uma década ou deixe vazio</option>
-          <option value="2020">2020</option>
-          <option value="2010">2010</option>
-          <option value="2000">2000</option>
-          <option value="1990">1990</option>
-          <option value="1980">1980</option>
-          <option value="1970">1970</option>
-          <option value="1960">1960</option>
-          <option value="1950">1950</option>
-          <option value="1940">1940</option>
+            <option value="">Selecione uma década ou deixe vazio</option>
+            <option value="2020">2020</option>
+            <option value="2010">2010</option>
+            <option value="2000">2000</option>
+            <option value="1990">1990</option>
+            <option value="1980">1980</option>
+            <option value="1970">1970</option>
+            <option value="1960">1960</option>
+            <option value="1950">1950</option>
+            <option value="1940">1940</option>
         </select>
-        <!-- Dropdown para selecionar a década de lançamento. É opcional. -->
 
         <button type="submit">Buscar Filmes</button>
-        <!-- Botão para enviar as preferências e buscar recomendações. -->
       </form>
 
       <div id="recommendations"></div>
-      <!-- Div onde serão exibidas as recomendações de filmes. -->
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <!-- Importa o arquivo de JavaScript para manipular o formulário e as recomendações. -->
   </body>
 </html>
