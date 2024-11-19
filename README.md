@@ -19,5 +19,4 @@ por meio de um crawler.
 
 # Video Explicativo:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/QLlvchvixgk?si=X6lG6MebmJafRzz1" frameborder="0" allow="accelerometer; 
-autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Assista ao vídeo](https://img.youtube.com/vi/QLlvchvixgk/0.jpg)](https://www.youtube.com/watch?v=QLlvchvixgk)
