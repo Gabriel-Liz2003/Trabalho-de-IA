@@ -22,14 +22,17 @@ def recommend():
     if not preferences:
         return jsonify({"error": "No preferences provided"}), 400
 
-    genero = preferences.get('genero')
-    duracao = preferences.get('duracao')
-    ano = preferences.get('ano')
+    genero = preferences.get('genero', '')
+    duracao = preferences.get('duracao', '')
+    ano = preferences.get('ano', '')
 
-    # Ligação com o back end
+    # Executa o crawler
     filmes_recomendados = criar_crawler_adorocinema(genero, duracao, ano)
-    return jsonify(filmes_recomendados)
 
+    if not filmes_recomendados:
+        return jsonify({"error": "No recommendations found"}), 404
+
+    return jsonify(filmes_recomendados), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
