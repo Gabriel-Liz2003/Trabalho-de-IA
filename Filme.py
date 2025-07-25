@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import unicodedata
+import os
  
  #Lista de generos pra busca
 GENERO_MAPA = {
@@ -20,6 +21,23 @@ GENERO_MAPA = {
     "romance": "13024",
     "suspense": "13023",
     "terror": "13009"
+}
+
+# Mapeamento de gêneros para a API do TMDb
+GENERO_MAPA_TMDB = {
+    "acao": 28,
+    "aventura": 12,
+    "animacao": 16,
+    "comedia": 35,
+    "drama": 18,
+    "familia": 10751,
+    "fantasia": 14,
+    "ficcao cientifica": 878,
+    "historico": 36,
+    "policial": 80,
+    "romance": 10749,
+    "suspense": 53,
+    "terror": 27
 }
 
 #Metodo pra remover acentos do texto 
@@ -130,6 +148,75 @@ def criar_crawler_adorocinema(genero, duracao, decada):
         print(f"Apenas {len(lista_filmes)} filmes foram encontrados no total.")
     return lista_filmes
 
+
+def criar_crawler_tmdb(genero, duracao, decada):
+    """Busca filmes usando a API do TMDb."""
+    api_key = os.getenv("TMDB_API_KEY")
+    if not api_key:
+        print("TMDB_API_KEY não definido no ambiente.")
+        return []
+
+    genero_codigo = GENERO_MAPA_TMDB.get(remover_acentos(genero.lower()))
+    if not genero_codigo:
+        print("Gênero não encontrado para o TMDb.")
+        return []
+
+    params = {
+        "api_key": api_key,
+        "language": "pt-BR",
+        "with_genres": genero_codigo,
+        "page": 1
+    }
+
+    if decada:
+        params["primary_release_date.gte"] = f"{decada}-01-01"
+        params["primary_release_date.lte"] = f"{int(decada)+9}-12-31"
+
+    if duracao.lower() == "curto":
+        params["with_runtime.lte"] = 130
+    elif duracao.lower() == "longos":
+        params["with_runtime.gte"] = 131
+
+    lista_filmes = []
+
+    while len(lista_filmes) < 10 and params["page"] <= 6:
+        response = requests.get("https://api.themoviedb.org/3/discover/movie", params=params)
+        if response.status_code != 200:
+            print("Erro ao acessar a API do TMDb.")
+            break
+
+        dados = response.json()
+        resultados = dados.get("results", [])
+
+        if not resultados:
+            break
+
+        for filme in resultados:
+            titulo = filme.get("title")
+            sinopse = filme.get("overview", "Sinopse não encontrada")
+            ano = filme.get("release_date", "").split("-")[0]
+            duracao_filme = filme.get("runtime", 0)  # pode não vir preenchido
+            imagem = film_poster_url = f"https://image.tmdb.org/t/p/w500{filme.get('poster_path')}" if filme.get("poster_path") else ""
+            url = f"https://www.themoviedb.org/movie/{filme.get('id')}"
+
+            lista_filmes.append({
+                "nome": titulo,
+                "imagem": imagem,
+                "duracao": duracao_filme,
+                "generos": genero,
+                "sinopse": sinopse,
+                "ano": ano,
+                "comentarios": ["Comentários indisponíveis."],
+                "url": url,
+            })
+
+            if len(lista_filmes) == 10:
+                break
+
+        params["page"] += 1
+
+    return lista_filmes
+
 def extrair_ano_lancamento(url_filme):
     """Extrai o ano de lançamento de uma página específica de filme."""
     try:
@@ -189,7 +276,11 @@ def exibir_recomendacoes(filmes):
 def sistema_recomendacao():
     """Sistema principal de recomendação."""
     genero, duracao, decada = perguntar_preferencias()
-    filmes = criar_crawler_adorocinema(genero, duracao, decada)
+    fonte = input("Escolha a fonte (adorocinema/tmdb): ").strip().lower() or "adorocinema"
+    if fonte == "tmdb":
+        filmes = criar_crawler_tmdb(genero, duracao, decada)
+    else:
+        filmes = criar_crawler_adorocinema(genero, duracao, decada)
     
     if filmes:
         exibir_recomendacoes(filmes)
