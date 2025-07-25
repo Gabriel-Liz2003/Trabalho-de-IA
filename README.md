@@ -13,8 +13,10 @@ O sistema deve apresentar:
 
 * Alguns comentários sobre o filme.
 
-As informações sobre os filmes devem ser retiradas de sites como www.adorocinema.com.br
-por meio de um crawler.
+As informações sobre os filmes podem ser obtidas de diferentes fontes. Por padrão
+a aplicação utiliza o site www.adorocinema.com.br por meio de um crawler. Também é
+possível consultar a API do TMDb definindo a variável de ambiente `TMDB_API_KEY`.
+Nesse caso, selecione "TMDb" como fonte na interface.
 
 
 # Video Explicativo:

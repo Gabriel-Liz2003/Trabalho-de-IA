@@ -5,6 +5,7 @@ document.getElementById('preferencesForm').addEventListener('submit', function (
     const genero = document.getElementById('genero').value;
     const duracao = document.getElementById('duracao').value;
     const ano = document.getElementById('ano').value;
+    const fonte = document.getElementById('fonte').value;
 
     // Envia os dados via POST para o servidor
     fetch('/recommend', {
@@ -12,7 +13,7 @@ document.getElementById('preferencesForm').addEventListener('submit', function (
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ genero, duracao, ano })
+        body: JSON.stringify({ genero, duracao, ano, fonte })
     })
         .then(response => {
             if (!response.ok) {

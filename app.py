@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 
-from Filme import criar_crawler_adorocinema
+from Filme import criar_crawler_adorocinema, criar_crawler_tmdb
 
 app = Flask(__name__)
 
@@ -25,14 +25,19 @@ def recommend():
     genero = preferences.get('genero', '')
     duracao = preferences.get('duracao', '')
     ano = preferences.get('ano', '')
+    fonte = preferences.get('fonte', 'adorocinema')
 
     # Executa o crawler
-    filmes_recomendados = criar_crawler_adorocinema(genero, duracao, ano)
+    if fonte == 'tmdb':
+        filmes_recomendados = criar_crawler_tmdb(genero, duracao, ano)
+    else:
+        filmes_recomendados = criar_crawler_adorocinema(genero, duracao, ano)
 
     if not filmes_recomendados:
         return jsonify({"error": "No recommendations found"}), 404
 
     return jsonify(filmes_recomendados), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
